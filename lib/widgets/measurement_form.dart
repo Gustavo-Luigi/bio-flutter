@@ -1,4 +1,5 @@
 import 'package:bio_flutter/models/measurement.dart';
+import 'package:bio_flutter/providers/screen_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -28,6 +29,7 @@ class _MeasurementFormState extends State<MeasurementForm> {
 
   Measurement? _selectedMeasurement;
   late MeasurementProvider _measurementProvider;
+  late final ScreenProvider _screenProvider;
 
   DateTime _measuredAtDate = DateTime.now();
   TimeOfDay _measuredAtTime = TimeOfDay.now();
@@ -40,6 +42,8 @@ class _MeasurementFormState extends State<MeasurementForm> {
     _measurementProvider =
         Provider.of<MeasurementProvider>(context, listen: false);
     _selectedMeasurement = _measurementProvider.selectedMeasurement;
+
+    _screenProvider = Provider.of<ScreenProvider>(context, listen: false);
 
     if (_selectedMeasurement != null) {
       _weightController.text = _selectedMeasurement!.weight.toString();
@@ -158,10 +162,13 @@ class _MeasurementFormState extends State<MeasurementForm> {
       measurement.id = _selectedMeasurement!.id;
       _measurementProvider.updateMeasurement(measurement);
     }
+
+    _screenProvider.selectedScreen = Screen.home;
   }
 
   void handleDelete() {
     _measurementProvider.deleteMeasurement(_selectedMeasurement!);
+    _screenProvider.selectedScreen = Screen.home;
   }
 
   @override
@@ -268,7 +275,11 @@ class _MeasurementFormState extends State<MeasurementForm> {
                   onPressed: handleSubmit, child: const Text('Salvar')),
               if (_selectedMeasurement != null)
                 ElevatedButton(
-                    onPressed: handleDelete, child: const Text('Excluir'), style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red))),
+                    onPressed: handleDelete,
+                    child: const Text('Excluir'),
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.red))),
             ],
           ),
         ],

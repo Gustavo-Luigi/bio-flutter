@@ -1,6 +1,8 @@
-import 'package:bio_flutter/screens/form_screen.dart';
-import 'package:bio_flutter/screens/measurements_screen.dart';
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
+
+import 'package:bio_flutter/providers/screen_provider.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({Key? key}) : super(key: key);
@@ -10,18 +12,23 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  int _selectedIndex = 0;
+  late ScreenProvider _screenProvider;
+  late Screen _selectedScreen;
+  bool navInitalized = false;
 
-  final List<Widget> _screens = const [
-    Text('home'),
-    MeasurementsScreen(),
-    FormScreen()
-  ];
+  @override
+  void didChangeDependencies() {
+    if (!navInitalized) {
+      _screenProvider = Provider.of<ScreenProvider>(context);
+      navInitalized = true;
+    }
+
+    _selectedScreen = _screenProvider.selectedScreen;
+    super.didChangeDependencies();
+  }
 
   void onItemTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    _screenProvider.selectedScreen = Screen.values[index];
   }
 
   @override
@@ -30,7 +37,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       appBar: AppBar(
         title: const Text('Biofit'),
       ),
-      body: _screens.elementAt(_selectedIndex),
+      body: _screenProvider.displaySelectedScreen(),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -42,7 +49,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         backgroundColor: Colors.blue,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.black,
-        currentIndex: _selectedIndex,
+        currentIndex: _selectedScreen.index,
         onTap: onItemTap,
       ),
     );

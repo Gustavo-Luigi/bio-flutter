@@ -1,4 +1,5 @@
 import 'package:bio_flutter/providers/measurement_provider.dart';
+import 'package:bio_flutter/providers/screen_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bio_flutter/models/measurement.dart';
@@ -41,20 +42,20 @@ List<Item> generateItems(List<Measurement> measurementList) {
 }
 
 class _MeasurementListState extends State<MeasurementList> {
-  bool measurementsLoaded = false;
-  List<Measurement> measurementList = [];
+  bool _measurementsLoaded = false;
+  List<Measurement> _measurementList = [];
   List<Item> _data = [];
+  late MeasurementProvider _measurementsProvider;
 
   @override
   void didChangeDependencies() {
-    var measurementsProvider = Provider.of<MeasurementProvider>(context);
-
-    if (!measurementsLoaded) {
-      measurementsProvider.selectAllMeasurements();
-      measurementsLoaded = true;
+    if (!_measurementsLoaded) {
+      _measurementsProvider = Provider.of<MeasurementProvider>(context);
+      _measurementsProvider.selectAllMeasurements();
+      _measurementsLoaded = true;
     }
-    measurementList = measurementsProvider.measurementList;
-    _data = generateItems(measurementList);
+    _measurementList = _measurementsProvider.measurementList;
+    _data = generateItems(_measurementList);
 
     super.didChangeDependencies();
   }
@@ -106,8 +107,9 @@ class _MeasurementListState extends State<MeasurementList> {
             ),
             trailing: GestureDetector(
               onTap: () {
-                Provider.of<MeasurementProvider>(context, listen: false).selectedMeasurement =
-                    item.measurement;
+                _measurementsProvider.selectedMeasurement = item.measurement;
+                Provider.of<ScreenProvider>(context, listen: false).selectedScreen =
+                    Screen.form;
               },
               child: const Icon(
                 Icons.edit_outlined,
