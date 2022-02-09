@@ -6,9 +6,7 @@ import 'package:bio_flutter/providers/measurement_provider.dart';
 import 'package:provider/provider.dart';
 
 class MeasurementForm extends StatefulWidget {
-  const MeasurementForm({
-    Key? key,
-  }) : super(key: key);
+  const MeasurementForm({Key? key}) : super(key: key);
 
   @override
   State<MeasurementForm> createState() => _MeasurementFormState();
@@ -16,29 +14,67 @@ class MeasurementForm extends StatefulWidget {
 
 class _MeasurementFormState extends State<MeasurementForm> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
-  TextEditingController weightController = TextEditingController();
-  TextEditingController fatPercentageController = TextEditingController();
-  TextEditingController waterController = TextEditingController();
-  TextEditingController muscleController = TextEditingController();
-  TextEditingController boneController = TextEditingController();
-  TextEditingController visceralFatController = TextEditingController();
-  TextEditingController basalController = TextEditingController();
-  TextEditingController bmiController = TextEditingController();
-  TextEditingController measuredAtDateController = TextEditingController(
+  final _weightController = TextEditingController();
+  final _fatController = TextEditingController();
+  final _waterController = TextEditingController();
+  final _muscleController = TextEditingController();
+  final _boneController = TextEditingController();
+  final _visceralController = TextEditingController();
+  final _basalController = TextEditingController();
+  final _bmiController = TextEditingController();
+  final _measuredAtDateController = TextEditingController(
       text: DateFormat('dd/MM/yyyy').format(DateTime.now()));
-  TextEditingController measuredAtTimeController =
-      TextEditingController(text: '00:00');
+  final _measuredAtTimeController = TextEditingController(text: '00:00');
 
-  DateTime measuredAtDate = DateTime.now();
-  TimeOfDay measuredAtTime = TimeOfDay.now();
+  Measurement? _selectedMeasurement;
+  late MeasurementProvider _measurementProvider;
 
-  String requiredFieldMessage = 'Este campo é obrigatório';
-  String mustBeANumberMessage = 'Este campo precisa ser um número';
+  DateTime _measuredAtDate = DateTime.now();
+  TimeOfDay _measuredAtTime = TimeOfDay.now();
+
+  final String _requiredFieldMessage = 'Este campo é obrigatório';
+  final String _mustBeANumberMessage = 'Este campo precisa ser um número';
+
+  @override
+  void didChangeDependencies() {
+    _measurementProvider =
+        Provider.of<MeasurementProvider>(context, listen: false);
+    _selectedMeasurement = _measurementProvider.selectedMeasurement;
+
+    if (_selectedMeasurement != null) {
+      _weightController.text = _selectedMeasurement!.weight.toString();
+      _fatController.text = _selectedMeasurement!.fat?.toString() ?? '';
+      _waterController.text = _selectedMeasurement!.water?.toString() ?? '';
+      _muscleController.text = _selectedMeasurement!.muscle?.toString() ?? '';
+      _boneController.text = _selectedMeasurement!.bone?.toString() ?? '';
+      _visceralController.text =
+          _selectedMeasurement!.visceral?.toString() ?? '';
+      _basalController.text =
+          _selectedMeasurement!.basal?.toStringAsFixed(0) ?? '';
+      _bmiController.text = _selectedMeasurement!.bmi?.toString() ?? '';
+
+      _measuredAtDateController.text =
+          DateFormat('dd/MM/yyyy').format(_selectedMeasurement!.measuredAt);
+      _measuredAtDate = _selectedMeasurement!.measuredAt;
+
+      var _selectedTimeOfDay = TimeOfDay(
+          hour: _selectedMeasurement!.measuredAt.hour,
+          minute: _selectedMeasurement!.measuredAt.minute);
+
+      _measuredAtTimeController.text =
+          _selectedTimeOfDay.format(context).toString();
+      _measuredAtTime = _selectedTimeOfDay;
+    } else {
+      _measuredAtTimeController.text = TimeOfDay.now().format(context);
+    }
+
+    super.didChangeDependencies();
+  }
 
   void pickDate() async {
     DateTime? selectedDate = await showDatePicker(
         context: context,
-        initialDate: measuredAtDate,
+        initialDate: _measuredAtDate,
         firstDate: DateTime(2020),
         lastDate: DateTime.now());
 
@@ -46,21 +82,21 @@ class _MeasurementFormState extends State<MeasurementForm> {
 
     if (selectedDate != null) {
       formatedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
-      measuredAtDate = selectedDate;
+      _measuredAtDate = selectedDate;
 
-      measuredAtDateController.text = formatedDate;
+      _measuredAtDateController.text = formatedDate;
     }
   }
 
   void pickTime() async {
     TimeOfDay? selectedTime = await showTimePicker(
-      initialTime: measuredAtTime,
+      initialTime: _measuredAtTime,
       context: context,
     );
 
     if (selectedTime != null) {
-      measuredAtTime = selectedTime;
-      measuredAtTimeController.text = selectedTime.format(context);
+      _measuredAtTime = selectedTime;
+      _measuredAtTimeController.text = selectedTime.format(context);
     }
   }
 
@@ -97,93 +133,127 @@ class _MeasurementFormState extends State<MeasurementForm> {
   void handleSubmit() async {
     _key.currentState!.validate();
 
-    final measurementProvider =
-        Provider.of<MeasurementProvider>(context, listen: false);
+    DateTime measuredAt = DateTime(
+      _measuredAtDate.year,
+      _measuredAtDate.month,
+      _measuredAtDate.day,
+      _measuredAtTime.hour,
+      _measuredAtTime.minute,
+    );
 
     Measurement measurement = Measurement(
-        weight: double.parse(weightController.text),
-        measuredAt: measuredAtDate);
+        weight: double.parse(_weightController.text),
+        fat: double.tryParse(_fatController.text),
+        water: double.tryParse(_waterController.text),
+        muscle: double.tryParse(_muscleController.text),
+        bone: double.tryParse(_boneController.text),
+        visceral: double.tryParse(_visceralController.text),
+        basal: double.tryParse(_basalController.text),
+        bmi: double.tryParse(_bmiController.text),
+        measuredAt: measuredAt);
 
-    measurementProvider.saveMeasurement(measurement);
+    if (_selectedMeasurement == null) {
+      _measurementProvider.saveMeasurement(measurement);
+    } else {
+      measurement.id = _selectedMeasurement!.id;
+      _measurementProvider.updateMeasurement(measurement);
+    }
+  }
+
+  void handleDelete() {
+    _measurementProvider.deleteMeasurement(_selectedMeasurement!);
+  }
+
+  @override
+  void dispose() {
+    _measurementProvider.selectedMeasurement = null;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    measuredAtTimeController.text = TimeOfDay.now().format(context);
     return Form(
       key: _key,
       child: Column(
         children: [
           TextFormField(
-            controller: weightController,
+            controller: _weightController,
             decoration: const InputDecoration(label: Text('Peso* (kg)')),
             keyboardType: TextInputType.number,
             validator: (value) {
               if (_isNullOrEmpty(value)) {
-                return requiredFieldMessage;
+                return _requiredFieldMessage;
               }
               if (_isStringANumber(value!)) {
                 return null;
               }
-              return mustBeANumberMessage;
+              return _mustBeANumberMessage;
             },
           ),
           TextFormField(
-            controller: fatPercentageController,
+            controller: _fatController,
             decoration: const InputDecoration(label: Text('Gordura (%)')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: waterController,
+            controller: _waterController,
             decoration: const InputDecoration(label: Text('Água (%)')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: muscleController,
+            controller: _muscleController,
             decoration: const InputDecoration(label: Text('Músculo (kg)')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: boneController,
+            controller: _boneController,
             decoration: const InputDecoration(label: Text('Ossos (kg)')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: visceralFatController,
+            controller: _visceralController,
             decoration: const InputDecoration(label: Text('Visceral (%)')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: basalController,
+            controller: _basalController,
             decoration: const InputDecoration(label: Text('Basal')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: bmiController,
+            controller: _bmiController,
             decoration: const InputDecoration(label: Text('IMC')),
             keyboardType: TextInputType.number,
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
-            controller: measuredAtDateController,
+            controller: _measuredAtDateController,
             decoration: const InputDecoration(
-                label: Text('Data da medição'),
-                suffixIcon: Icon(Icons.calendar_today)),
+              label: Text('Data da medição'),
+              suffixIcon: Icon(
+                Icons.calendar_today,
+                color: Colors.blueAccent,
+              ),
+            ),
             keyboardType: TextInputType.number,
             readOnly: true,
             onTap: pickDate,
           ),
           TextFormField(
-            controller: measuredAtTimeController,
+            controller: _measuredAtTimeController,
             decoration: const InputDecoration(
-                label: Text('Hora da medição'),
-                suffixIcon: Icon(Icons.watch_later_outlined)),
+              label: Text('Hora da medição'),
+              suffixIcon: Icon(
+                Icons.watch_later_outlined,
+                color: Colors.blueAccent,
+              ),
+            ),
             keyboardType: TextInputType.number,
             readOnly: true,
             onTap: pickTime,
@@ -191,7 +261,16 @@ class _MeasurementFormState extends State<MeasurementForm> {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(onPressed: handleSubmit, child: const Text('Salvar')),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton(
+                  onPressed: handleSubmit, child: const Text('Salvar')),
+              if (_selectedMeasurement != null)
+                ElevatedButton(
+                    onPressed: handleDelete, child: const Text('Excluir'), style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red))),
+            ],
+          ),
         ],
       ),
     );

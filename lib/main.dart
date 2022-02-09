@@ -1,9 +1,12 @@
-import 'package:bio_flutter/providers/measurement_provider.dart';
-import 'package:flutter/material.dart';
-
+import 'package:bio_flutter/bottom_nav_bar.dart';
 import 'package:bio_flutter/screens/form_screen.dart';
-
+import 'package:bio_flutter/widgets/measurement_form.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'package:bio_flutter/providers/measurement_provider.dart';
+import 'package:bio_flutter/screens/measurements_screen.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +34,7 @@ class MyApp extends StatelessWidget {
           // is not restarted.
           primarySwatch: Colors.blue,
         ),
-        home: const FormScreen(),
+        home: const BottomNavBar(),
       ),
     );
   }

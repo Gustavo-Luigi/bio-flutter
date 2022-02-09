@@ -1,7 +1,7 @@
 import 'package:bio_flutter/database/measurement_table.dart';
 
 class Measurement {
-  int? id;
+  int? _id;
   double weight;
   double? fat;
   double? water;
@@ -12,9 +12,17 @@ class Measurement {
   double? bmi;
   DateTime measuredAt;
 
+  int? get id {
+    return _id;
+  }
+
+  set id(value) {
+    _id ??= value;
+  }
+
   Measurement(
-      {required this.weight,
-      this.id,
+      {id,
+      required this.weight,
       this.fat,
       this.water,
       this.muscle,
@@ -22,15 +30,28 @@ class Measurement {
       this.visceral,
       this.basal,
       this.bmi,
-      required this.measuredAt});
+      required this.measuredAt})
+      : _id = id;
+
+  Measurement.fromMap(Map<String, dynamic> measurementMap)
+      : _id = measurementMap[MeasurementTable.id],
+        weight = measurementMap[MeasurementTable.weight],
+        fat = measurementMap[MeasurementTable.fat],
+        water = measurementMap[MeasurementTable.water],
+        muscle = measurementMap[MeasurementTable.muscle],
+        bone = measurementMap[MeasurementTable.bone],
+        visceral = measurementMap[MeasurementTable.visceral],
+        basal = measurementMap[MeasurementTable.basal],
+        bmi = measurementMap[MeasurementTable.bmi],
+        measuredAt =
+            DateTime.parse(measurementMap[MeasurementTable.measuredAt]);
 
   Map<String, dynamic> toMap() {
-
     final Map<String, dynamic> measurementMap;
-    
-    if (id != null) {
+
+    if (_id != null) {
       measurementMap = {
-        MeasurementTable.id: id,
+        MeasurementTable.id: _id,
         MeasurementTable.weight: weight,
         MeasurementTable.fat: fat,
         MeasurementTable.water: water,

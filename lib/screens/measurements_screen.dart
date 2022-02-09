@@ -1,17 +1,13 @@
 import 'package:bio_flutter/widgets/measurement_list.dart';
 import 'package:flutter/material.dart';
 
-class MeasureMentScreen extends StatelessWidget {
-  const MeasureMentScreen({Key? key}) : super(key: key);
-
-  static const routeName = 'measurements-screen';
+class MeasurementsScreen extends StatelessWidget {
+  const MeasurementsScreen({ Key? key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Medições'),
-        ),
-        body: const SingleChildScrollView(child: MeasurementList()));
+    return const SingleChildScrollView(
+      child: MeasurementList(),
+    );
   }
 }

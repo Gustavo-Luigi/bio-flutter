@@ -1,9 +1,14 @@
+import 'package:bio_flutter/providers/measurement_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bio_flutter/models/measurement.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class MeasurementList extends StatefulWidget {
-  const MeasurementList({Key? key}) : super(key: key);
+  const MeasurementList({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _MeasurementListState createState() => _MeasurementListState();
@@ -23,10 +28,12 @@ class Item {
 List<Item> generateItems(List<Measurement> measurementList) {
   List<Item> itemList = [];
 
-  for(final measurement in measurementList) {
+  for (final measurement in measurementList) {
     Item item = Item(
         measurement: measurement,
-        headerValue: measurement.measuredAt.toString());
+        headerValue:
+            'Medido em: ${DateFormat('dd/MM/yyyy').format(measurement.measuredAt)} às ${DateFormat('HH:mm').format(measurement.measuredAt)}');
+    // headerValue: measurement.measuredAt.toString());
     itemList.add(item);
   }
 
@@ -34,13 +41,23 @@ List<Item> generateItems(List<Measurement> measurementList) {
 }
 
 class _MeasurementListState extends State<MeasurementList> {
-  static List<Measurement> measurements = [
-    Measurement(weight: 93, fat: 26, measuredAt: DateTime.now()),
-    Measurement(weight: 93, measuredAt: DateTime(2022, 1, 15)),
-    Measurement(weight: 93, measuredAt: DateTime(2022, 1, 5)),
-  ];
+  bool measurementsLoaded = false;
+  List<Measurement> measurementList = [];
+  List<Item> _data = [];
 
-  final List<Item> _data = generateItems(measurements);
+  @override
+  void didChangeDependencies() {
+    var measurementsProvider = Provider.of<MeasurementProvider>(context);
+
+    if (!measurementsLoaded) {
+      measurementsProvider.selectAllMeasurements();
+      measurementsLoaded = true;
+    }
+    measurementList = measurementsProvider.measurementList;
+    _data = generateItems(measurementList);
+
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,56 +75,46 @@ class _MeasurementListState extends State<MeasurementList> {
             );
           },
           body: ListTile(
-              title: Wrap(
-                spacing: 20,
-                children: [
-                  Text('Peso: ${item.measurement.weight}'),
-
-                  item.measurement.fat != null 
-                  ?
-                    Text('Gordura: ${item.measurement.fat}%')
-                  : const Text('Gordura: --'),
-
-                  item.measurement.water != null 
-                  ?
-                    Text('Gordura: ${item.measurement.water}%')
-                  : const Text('Água: --'),
-
-                  item.measurement.muscle != null 
-                  ?
-                    Text('Mpusculo: ${item.measurement.muscle}kg')
-                  : const Text('Músculo: --'),
-
-                  item.measurement.muscle != null 
-                  ?
-                    Text('Ossos: ${item.measurement.bone}kg')
-                  : const Text('Ossos: --'),
-
-                  item.measurement.muscle != null 
-                  ?
-                    Text('Visceral: ${item.measurement.visceral}%')
-                  : const Text('Visceral: --'),
-
-                  item.measurement.basal != null 
-                  ?
-                    Text('Basal: ${item.measurement.basal}%')
-                  : const Text('Basal: --'),
-
-                  item.measurement.bmi != null 
-                  ?
-                    Text('IMC: ${item.measurement.bmi}')
-                  : const Text('IMC: --'),
-                ],
+            title: Wrap(
+              direction: Axis.vertical,
+              spacing: 20,
+              children: [
+                Text('Peso: ${item.measurement.weight}'),
+                item.measurement.fat != null
+                    ? Text('Gordura: ${item.measurement.fat}%')
+                    : const Text('Gordura: --'),
+                item.measurement.water != null
+                    ? Text('Água: ${item.measurement.water}%')
+                    : const Text('Água: --'),
+                item.measurement.muscle != null
+                    ? Text('Músculo: ${item.measurement.muscle}kg')
+                    : const Text('Músculo: --'),
+                item.measurement.muscle != null
+                    ? Text('Ossos: ${item.measurement.bone}kg')
+                    : const Text('Ossos: --'),
+                item.measurement.muscle != null
+                    ? Text('Visceral: ${item.measurement.visceral}%')
+                    : const Text('Visceral: --'),
+                item.measurement.basal != null
+                    ? Text(
+                        'Basal: ${item.measurement.basal!.toStringAsFixed(0)}')
+                    : const Text('Basal: --'),
+                item.measurement.bmi != null
+                    ? Text('IMC: ${item.measurement.bmi}')
+                    : const Text('IMC: --'),
+              ],
+            ),
+            trailing: GestureDetector(
+              onTap: () {
+                Provider.of<MeasurementProvider>(context, listen: false).selectedMeasurement =
+                    item.measurement;
+              },
+              child: const Icon(
+                Icons.edit_outlined,
+                color: Colors.blueAccent,
               ),
-              // subtitle:
-              //     const Text('To delete this panel, tap the trash can icon'),
-              // trailing: const Icon(Icons.delete),
-              // onTap: () {
-              //   setState(() {
-              //     _data.removeWhere((Item currentItem) => item == currentItem);
-              //   });
-              // }
-              ),
+            ),
+          ),
           isExpanded: item.isExpanded,
         );
       }).toList(),
