@@ -24,8 +24,8 @@ class DatabaseProvider {
     String dbPath = await getDatabasesPath();
 
     return await openDatabase(
-      join(dbPath, 'measurement_db.db'),
-      version: 2,
+      join(dbPath, 'measurements.db'),
+      version: 1,
       onCreate: (Database database, int version) async {
         await database.execute(MeasurementTable.createTable());
       },

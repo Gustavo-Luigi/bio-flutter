@@ -38,6 +38,7 @@ dependencies:
   path: ^1.8.0
   intl: ^0.17.0
   provider: ^6.0.2
+  syncfusion_flutter_charts: ^19.4.50
 
 
 dev_dependencies:
