@@ -34,7 +34,6 @@ List<Item> generateItems(List<Measurement> measurementList) {
         measurement: measurement,
         headerValue:
             'Medido em: ${DateFormat('dd/MM/yyyy').format(measurement.measuredAt)} às ${DateFormat('HH:mm').format(measurement.measuredAt)}');
-    // headerValue: measurement.measuredAt.toString());
     itemList.add(item);
   }
 
@@ -46,12 +45,24 @@ class _MeasurementListState extends State<MeasurementList> {
   List<Measurement> _measurementList = [];
   List<Item> _data = [];
   late MeasurementProvider _measurementsProvider;
+  late int _filterListSize;
+  late int _filterMonth;
+  late int _filterYear;
+
+  @override
+  void initState() {
+    _filterListSize = 15;
+    _filterMonth = DateTime.now().month;
+    _filterYear = DateTime.now().year;
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
     if (!_measurementsLoaded) {
       _measurementsProvider = Provider.of<MeasurementProvider>(context);
-      _measurementsProvider.selectAllMeasurements();
+      _measurementsProvider.selectPaginatedMeasurements(
+          quantity: _filterListSize, month: _filterMonth, year: _filterYear);
       _measurementsLoaded = true;
     }
     _measurementList = _measurementsProvider.measurementList;
@@ -60,66 +71,159 @@ class _MeasurementListState extends State<MeasurementList> {
     super.didChangeDependencies();
   }
 
+  List<int> getYearList() {
+    const int initialYear = 2020;
+    final int finalYear = DateTime.now().year;
+
+    List<int> yearList = [];
+
+    for (var year = initialYear; year <= finalYear; year++) {
+      yearList.add(year);
+    }
+
+    return yearList;
+  }
+
+  List<int> getMonthList() {
+    List<int> monthList = [];
+
+    for (var month = 1; month <= 12; month++) {
+      monthList.add(month);
+    }
+
+    return monthList;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _data[index].isExpanded = !isExpanded;
-        });
-      },
-      children: _data.map<ExpansionPanel>((Item item) {
-        return ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return ListTile(
-              title: Text(item.headerValue),
-            );
-          },
-          body: ListTile(
-            title: Wrap(
-              direction: Axis.vertical,
-              spacing: 20,
+    return Column(children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
               children: [
-                Text('Peso: ${item.measurement.weight}'),
-                item.measurement.fat != null
-                    ? Text('Gordura: ${item.measurement.fat}%')
-                    : const Text('Gordura: --'),
-                item.measurement.water != null
-                    ? Text('Água: ${item.measurement.water}%')
-                    : const Text('Água: --'),
-                item.measurement.muscle != null
-                    ? Text('Músculo: ${item.measurement.muscle}kg')
-                    : const Text('Músculo: --'),
-                item.measurement.muscle != null
-                    ? Text('Ossos: ${item.measurement.bone}kg')
-                    : const Text('Ossos: --'),
-                item.measurement.muscle != null
-                    ? Text('Visceral: ${item.measurement.visceral}%')
-                    : const Text('Visceral: --'),
-                item.measurement.basal != null
-                    ? Text(
-                        'Basal: ${item.measurement.basal!.toStringAsFixed(0)}')
-                    : const Text('Basal: --'),
-                item.measurement.bmi != null
-                    ? Text('IMC: ${item.measurement.bmi}')
-                    : const Text('IMC: --'),
+                const Text('Qtd: '),
+                DropdownButton(
+                    value: _filterListSize,
+                    items: <int>[5, 10, 15, 20, 25, 30]
+                        .map<DropdownMenuItem<int>>((selectedListSize) {
+                      return DropdownMenuItem<int>(
+                          value: selectedListSize,
+                          child: Text(selectedListSize.toString()));
+                    }).toList(),
+                    onChanged: (int? selectedListSize) {
+                      _filterListSize = selectedListSize!;
+                      _measurementsProvider.selectPaginatedMeasurements(
+                          quantity: _filterListSize,
+                          month: _filterMonth,
+                          year: _filterYear);
+                    }),
               ],
             ),
-            trailing: GestureDetector(
-              onTap: () {
-                _measurementsProvider.selectedMeasurement = item.measurement;
-                Provider.of<ScreenProvider>(context, listen: false).selectedScreen =
-                    Screen.form;
-              },
-              child: const Icon(
-                Icons.edit_outlined,
-                color: Colors.blueAccent,
+            Row(
+              children: [
+                const Text('Mês: '),
+                DropdownButton(
+                    value: _filterMonth,
+                    items: getMonthList()
+                        .map<DropdownMenuItem<int>>((selectedMonth) {
+                      return DropdownMenuItem<int>(
+                          value: selectedMonth,
+                          child: Text(selectedMonth.toString()));
+                    }).toList(),
+                    onChanged: (int? selectedMonth) {
+                      _filterMonth = selectedMonth!;
+                      _measurementsProvider.selectPaginatedMeasurements(
+                          quantity: _filterListSize,
+                          month: _filterMonth,
+                          year: _filterYear);
+                    }),
+              ],
+            ),
+            Row(
+              children: [
+                const Text('Ano: '),
+                DropdownButton(
+                    value: _filterYear,
+                    items: getYearList()
+                        .map<DropdownMenuItem<int>>((selectedYear) {
+                      return DropdownMenuItem<int>(
+                          value: selectedYear,
+                          child: Text(selectedYear.toString()));
+                    }).toList(),
+                    onChanged: (int? selectedYear) {
+                      _filterYear = selectedYear!;
+                      _measurementsProvider.selectPaginatedMeasurements(
+                          quantity: _filterListSize,
+                          month: _filterMonth,
+                          year: _filterYear);
+                    }),
+              ],
+            ),
+          ],
+        ),
+      ),
+      ExpansionPanelList(
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() {
+            _data[index].isExpanded = !isExpanded;
+          });
+        },
+        children: _data.map<ExpansionPanel>((Item item) {
+          return ExpansionPanel(
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return ListTile(
+                title: Text(item.headerValue),
+              );
+            },
+            body: ListTile(
+              title: Wrap(
+                direction: Axis.vertical,
+                spacing: 20,
+                children: [
+                  Text('Peso: ${item.measurement.weight}'),
+                  item.measurement.fat != null
+                      ? Text('Gordura: ${item.measurement.fat}%')
+                      : const Text('Gordura: --'),
+                  item.measurement.water != null
+                      ? Text('Água: ${item.measurement.water}%')
+                      : const Text('Água: --'),
+                  item.measurement.muscle != null
+                      ? Text('Músculo: ${item.measurement.muscle}kg')
+                      : const Text('Músculo: --'),
+                  item.measurement.muscle != null
+                      ? Text('Ossos: ${item.measurement.bone}kg')
+                      : const Text('Ossos: --'),
+                  item.measurement.muscle != null
+                      ? Text('Visceral: ${item.measurement.visceral}%')
+                      : const Text('Visceral: --'),
+                  item.measurement.basal != null
+                      ? Text(
+                          'Basal: ${item.measurement.basal!.toStringAsFixed(0)}')
+                      : const Text('Basal: --'),
+                  item.measurement.bmi != null
+                      ? Text('IMC: ${item.measurement.bmi}')
+                      : const Text('IMC: --'),
+                ],
+              ),
+              trailing: GestureDetector(
+                onTap: () {
+                  _measurementsProvider.selectedMeasurement = item.measurement;
+                  Provider.of<ScreenProvider>(context, listen: false)
+                      .selectedScreen = Screen.form;
+                },
+                child: const Icon(
+                  Icons.edit_outlined,
+                  color: Colors.blueAccent,
+                ),
               ),
             ),
-          ),
-          isExpanded: item.isExpanded,
-        );
-      }).toList(),
-    );
+            isExpanded: item.isExpanded,
+          );
+        }).toList(),
+      ),
+    ]);
   }
 }

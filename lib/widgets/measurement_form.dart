@@ -1,10 +1,11 @@
-import 'package:bio_flutter/models/measurement.dart';
-import 'package:bio_flutter/providers/screen_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:bio_flutter/providers/measurement_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'package:bio_flutter/models/measurement.dart';
+import 'package:bio_flutter/providers/screen_provider.dart';
+import 'package:bio_flutter/providers/measurement_provider.dart';
 
 class MeasurementForm extends StatefulWidget {
   const MeasurementForm({Key? key}) : super(key: key);

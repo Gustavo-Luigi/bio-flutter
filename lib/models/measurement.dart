@@ -61,6 +61,8 @@ class Measurement {
         MeasurementTable.basal: basal,
         MeasurementTable.bmi: bmi,
         MeasurementTable.measuredAt: measuredAt.toString(),
+        MeasurementTable.measuredAtMonth: measuredAt.month,
+        MeasurementTable.measuredAtYear: measuredAt.year,
       };
     } else {
       measurementMap = {
@@ -73,6 +75,8 @@ class Measurement {
         MeasurementTable.basal: basal,
         MeasurementTable.bmi: bmi,
         MeasurementTable.measuredAt: measuredAt.toString(),
+        MeasurementTable.measuredAtMonth: measuredAt.month,
+        MeasurementTable.measuredAtYear: measuredAt.year,
       };
     }
 

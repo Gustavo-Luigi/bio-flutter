@@ -23,7 +23,10 @@ class MeasurementProvider with ChangeNotifier {
   }
 
   Future<bool> saveMeasurement(Measurement measurement) async {
-    int measurementId = await _saveMeasurementToDatabase(measurement);
+    var connection = await DatabaseProvider.db.database;
+
+    int measurementId = await connection.insert(
+        MeasurementTable.tableName, measurement.toMap());
 
     if (measurementId != 0) {
       measurement.id = measurementId;
@@ -34,13 +37,10 @@ class MeasurementProvider with ChangeNotifier {
     return false;
   }
 
-  void selectMeasurementById() {
-    // handle select from db
-  }
-
   Future<void> selectAllMeasurements() async {
     var connection = await DatabaseProvider.db.database;
-    var results = await connection.query(MeasurementTable.tableName);
+    var results = await connection.query(MeasurementTable.tableName,
+        orderBy: MeasurementTable.measuredAt);
 
     List<Measurement> selectedMeasurements = [];
 
@@ -52,7 +52,30 @@ class MeasurementProvider with ChangeNotifier {
     measurementList = selectedMeasurements;
   }
 
-  void updateMeasurement(Measurement measurement) async {
+  Future<void> selectPaginatedMeasurements({
+    int? quantity,
+    required int month,
+    required int year,
+  }) async {
+    var connection = await DatabaseProvider.db.database;
+    var results = await connection.query(MeasurementTable.tableName,
+        where:
+            '(${MeasurementTable.measuredAtMonth} = ? AND ${MeasurementTable.measuredAtYear} = ?)',
+        whereArgs: [month, year],
+        orderBy: '${MeasurementTable.measuredAt} DESC',
+        limit: quantity);
+
+    List<Measurement> selectedMeasurements = [];
+
+    for (var measurement in results) {
+      Measurement newMeasurement = Measurement.fromMap(measurement);
+      selectedMeasurements.add(newMeasurement);
+    }
+
+    measurementList = selectedMeasurements;
+  }
+
+  Future<void> updateMeasurement(Measurement measurement) async {
     var connection = await DatabaseProvider.db.database;
 
     await connection.update(
@@ -63,19 +86,13 @@ class MeasurementProvider with ChangeNotifier {
     );
   }
 
-  void deleteMeasurement(Measurement measurement) async {
-        var connection = await DatabaseProvider.db.database;
+  Future<void> deleteMeasurement(Measurement measurement) async {
+    var connection = await DatabaseProvider.db.database;
 
-      await connection.delete(
+    await connection.delete(
       MeasurementTable.tableName,
       where: '${MeasurementTable.id} = ?',
       whereArgs: [measurement.id],
     );
-  }
-
-  Future<int> _saveMeasurementToDatabase(Measurement measurement) async {
-    var connection = await DatabaseProvider.db.database;
-    return await connection.insert(
-        MeasurementTable.tableName, measurement.toMap());
   }
 }

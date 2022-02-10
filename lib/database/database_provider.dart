@@ -20,18 +20,12 @@ class DatabaseProvider {
     return _database!;
   }
 
-  // _onConfigure(Database db) async {
-  //   // Add support for cascade delete
-  //   await db.execute("PRAGMA foreign_keys = ON");
-  // }
-
   Future<Database> createDatabase() async {
     String dbPath = await getDatabasesPath();
 
     return await openDatabase(
-      join(dbPath, 'measurement.db'),
-      // onConfigure: _onConfigure,
-      version: 1,
+      join(dbPath, 'measurement_db.db'),
+      version: 2,
       onCreate: (Database database, int version) async {
         await database.execute(MeasurementTable.createTable());
       },

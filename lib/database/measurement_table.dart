@@ -10,6 +10,8 @@ class MeasurementTable {
   static const String basal = 'basal';
   static const String bmi = 'bmi';
   static const String measuredAt = 'measured_at';
+  static const String measuredAtMonth = 'measured_at_month';
+  static const String measuredAtYear = 'measured_at_year';
 
   static String createTable() {
     return "CREATE TABLE ${MeasurementTable.tableName} ("
@@ -22,7 +24,9 @@ class MeasurementTable {
         "${MeasurementTable.visceral} REAL,"
         "${MeasurementTable.basal} REAL,"
         "${MeasurementTable.bmi} REAL,"
-        "${MeasurementTable.measuredAt} TEXT NOT NULL"
+        "${MeasurementTable.measuredAt} TEXT NOT NULL,"
+        "${MeasurementTable.measuredAtMonth} INTEGER NOT NULL,"
+        "${MeasurementTable.measuredAtYear} INTEGER NOT NULL"
         ")";
   }
 }
