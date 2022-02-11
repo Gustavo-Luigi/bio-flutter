@@ -1,3 +1,4 @@
+import 'package:bio_flutter/widgets/loading.dart';
 import 'package:bio_flutter/widgets/not_enought_measurements.dart';
 import 'package:flutter/material.dart';
 
@@ -17,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _measurementsLoaded = false;
   late MeasurementProvider _measurementProvider;
+  late bool _isLoading;
   List<Measurement> _measurements = [];
 
   @override
@@ -26,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _measurementProvider.selectAllMeasurements();
       _measurementsLoaded = true;
     }
+    _isLoading = _measurementProvider.isLoadingMeasurements;
     _measurements = _measurementProvider.measurementList;
 
     super.didChangeDependencies();
@@ -34,15 +37,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: 
-      _measurements.length > 1 ?
-      SingleChildScrollView(
-        child: Charts(
-          measurements: _measurements,
-        ),
-      )
-      :
-      const NotEnoughMeasurements()
-    );
+        child: _isLoading
+            ? const Loading()
+            : _measurements.length > 1
+                ? SingleChildScrollView(
+                    child: Charts(
+                      measurements: _measurements,
+                    ),
+                  )
+                : const NotEnoughMeasurements());
   }
 }

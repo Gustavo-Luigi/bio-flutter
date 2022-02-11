@@ -1,23 +1,17 @@
-import 'package:bio_flutter/models/measurement.dart';
-import 'package:bio_flutter/providers/measurement_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:bio_flutter/models/measurement.dart';
 
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 class Charts extends StatelessWidget {
-  Charts({
+  const Charts({
     Key? key,
     required List<Measurement> measurements,
   })  : _measurements = measurements,
         super(key: key);
 
   final List<Measurement> _measurements;
-  List<Measurement> _muscleData = [];
-  List<Measurement> _fatData = [];
-  List<Measurement> _visceralData = [];
 
   List<Measurement> generateMuscleChartData(List<Measurement> measurements) {
     List<Measurement> cleanMuscleData = [];
@@ -57,9 +51,9 @@ class Charts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _muscleData = generateMuscleChartData(_measurements);
-    _fatData = generateFatChartData(_measurements);
-    _visceralData = generateVisceralChartData(_measurements);
+    List<Measurement> _muscleData = generateMuscleChartData(_measurements);
+    List<Measurement> _fatData = generateFatChartData(_measurements);
+    List<Measurement> _visceralData = generateVisceralChartData(_measurements);
 
     return Column(
       children: [

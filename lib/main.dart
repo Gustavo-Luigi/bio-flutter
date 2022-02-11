@@ -1,3 +1,4 @@
+import 'package:bio_flutter/providers/filter_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => MeasurementProvider()),
         ChangeNotifierProvider(create: (_) => ScreenProvider()),
+        ChangeNotifierProvider(create: (_) => FilterProvider()),
       ],
       child: MaterialApp(
         title: 'Bio Flutter',

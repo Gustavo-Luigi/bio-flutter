@@ -7,6 +7,12 @@ import 'package:bio_flutter/database/database_provider.dart';
 class MeasurementProvider with ChangeNotifier {
   Measurement? selectedMeasurement;
   List<Measurement> _measurementList = [];
+  bool _isLoadingMeasurements = true;
+
+
+  get isLoadingMeasurements {
+    return _isLoadingMeasurements;
+  }
 
   List<Measurement> get measurementList {
     return [..._measurementList];
@@ -20,6 +26,10 @@ class MeasurementProvider with ChangeNotifier {
   void _addMeasurementToList(Measurement measurement) {
     _measurementList.add(measurement);
     notifyListeners();
+  }
+
+  void clearMeasurementList() {
+    _measurementList = [];
   }
 
   Future<bool> saveMeasurement(Measurement measurement) async {
@@ -38,6 +48,8 @@ class MeasurementProvider with ChangeNotifier {
   }
 
   Future<void> selectAllMeasurements() async {
+    _isLoadingMeasurements = true;
+
     var connection = await DatabaseProvider.db.database;
     var results = await connection.query(MeasurementTable.tableName,
         orderBy: MeasurementTable.measuredAt);
@@ -50,6 +62,7 @@ class MeasurementProvider with ChangeNotifier {
     }
 
     measurementList = selectedMeasurements;
+    _isLoadingMeasurements = false;
   }
 
   Future<void> selectPaginatedMeasurements({
@@ -57,6 +70,7 @@ class MeasurementProvider with ChangeNotifier {
     required int month,
     required int year,
   }) async {
+    _isLoadingMeasurements = true;
     var connection = await DatabaseProvider.db.database;
     var results = await connection.query(MeasurementTable.tableName,
         where:
@@ -73,6 +87,7 @@ class MeasurementProvider with ChangeNotifier {
     }
 
     measurementList = selectedMeasurements;
+    _isLoadingMeasurements = false;
   }
 
   Future<void> updateMeasurement(Measurement measurement) async {

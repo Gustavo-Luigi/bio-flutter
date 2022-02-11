@@ -9,7 +9,7 @@ class NotEnoughMeasurements extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        const Text('Nada para mostrar, insira mais medições!'),
+        const Text('Sem medições na data escolhida, insira mais medições!'),
         ElevatedButton(
           onPressed: () {
             Provider.of<ScreenProvider>(context, listen: false).selectedScreen =
