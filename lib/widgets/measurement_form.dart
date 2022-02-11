@@ -187,7 +187,7 @@ class _MeasurementFormState extends State<MeasurementForm> {
           TextFormField(
             controller: _weightController,
             decoration: const InputDecoration(label: Text('Peso* (kg)')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: (value) {
               if (_isNullOrEmpty(value)) {
                 return _requiredFieldMessage;
@@ -201,43 +201,43 @@ class _MeasurementFormState extends State<MeasurementForm> {
           TextFormField(
             controller: _fatController,
             decoration: const InputDecoration(label: Text('Gordura (%)')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
             controller: _waterController,
             decoration: const InputDecoration(label: Text('Água (%)')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
             controller: _muscleController,
             decoration: const InputDecoration(label: Text('Músculo (kg)')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
             controller: _boneController,
             decoration: const InputDecoration(label: Text('Ossos (kg)')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
             controller: _visceralController,
             decoration: const InputDecoration(label: Text('Visceral (%)')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
             controller: _basalController,
             decoration: const InputDecoration(label: Text('Basal')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
             controller: _bmiController,
             decoration: const InputDecoration(label: Text('IMC')),
-            keyboardType: TextInputType.number,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: _validateOptionalNumberField,
           ),
           TextFormField(
