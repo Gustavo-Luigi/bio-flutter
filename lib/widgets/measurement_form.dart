@@ -81,7 +81,8 @@ class _MeasurementFormState extends State<MeasurementForm> {
         context: context,
         initialDate: _measuredAtDate,
         firstDate: DateTime(2020),
-        lastDate: DateTime.now());
+        lastDate: DateTime.now()
+        );
 
     String formatedDate;
 
