@@ -81,8 +81,7 @@ class _MeasurementFormState extends State<MeasurementForm> {
         context: context,
         initialDate: _measuredAtDate,
         firstDate: DateTime(2020),
-        lastDate: DateTime.now()
-        );
+        lastDate: DateTime.now());
 
     String formatedDate;
 
@@ -127,6 +126,7 @@ class _MeasurementFormState extends State<MeasurementForm> {
   }
 
   bool _isStringANumber(String value) {
+    value = value.replaceAll(',', '.');
     double? isNumber = double.tryParse(value);
 
     if (isNumber == null) {
@@ -137,35 +137,38 @@ class _MeasurementFormState extends State<MeasurementForm> {
   }
 
   void handleSubmit() async {
-    _key.currentState!.validate();
+    bool formIsValid = _key.currentState!.validate();
 
-    DateTime measuredAt = DateTime(
-      _measuredAtDate.year,
-      _measuredAtDate.month,
-      _measuredAtDate.day,
-      _measuredAtTime.hour,
-      _measuredAtTime.minute,
-    );
+    if (formIsValid) {
+      DateTime measuredAt = DateTime(
+        _measuredAtDate.year,
+        _measuredAtDate.month,
+        _measuredAtDate.day,
+        _measuredAtTime.hour,
+        _measuredAtTime.minute,
+      );
 
-    Measurement measurement = Measurement(
-        weight: double.parse(_weightController.text),
-        fat: double.tryParse(_fatController.text),
-        water: double.tryParse(_waterController.text),
-        muscle: double.tryParse(_muscleController.text),
-        bone: double.tryParse(_boneController.text),
-        visceral: double.tryParse(_visceralController.text),
-        basal: double.tryParse(_basalController.text),
-        bmi: double.tryParse(_bmiController.text),
-        measuredAt: measuredAt);
+      Measurement measurement = Measurement(
+          weight: double.parse(_weightController.text.replaceAll(',', '.')),
+          fat: double.tryParse(_fatController.text.replaceAll(',', '.')),
+          water: double.tryParse(_waterController.text.replaceAll(',', '.')),
+          muscle: double.tryParse(_muscleController.text.replaceAll(',', '.')),
+          bone: double.tryParse(_boneController.text.replaceAll(',', '.')),
+          visceral: double.tryParse(_visceralController.text.replaceAll(',', '.')),
+          basal: double.tryParse(_basalController.text.replaceAll(',', '.')),
+          bmi: double.tryParse(_bmiController.text.replaceAll(',', '.')),
+          measuredAt: measuredAt);
 
-    if (_selectedMeasurement == null) {
-      _measurementProvider.saveMeasurement(measurement);
-    } else {
-      measurement.id = _selectedMeasurement!.id;
-      _measurementProvider.updateMeasurement(measurement);
+      if (_selectedMeasurement == null) {
+        _measurementProvider.saveMeasurement(measurement);
+      } else {
+        measurement.id = _selectedMeasurement!.id;
+        _measurementProvider.updateMeasurement(measurement);
+      }
+
+      _screenProvider.selectedScreen = Screen.home;
     }
 
-    _screenProvider.selectedScreen = Screen.home;
   }
 
   void handleDelete() {
