@@ -35,7 +35,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Biofit'),
+        title: const Text('Bio flutter'),
       ),
       body: _screenProvider.displaySelectedScreen(),
       bottomNavigationBar: BottomNavigationBar(
